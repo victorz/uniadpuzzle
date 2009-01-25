@@ -373,6 +373,26 @@ unsigned char pic[320][320];
 typedef double block_t[8][8];
 typedef short quant_block_t[8][8];
 
+/*
+ * Missing function -- part of problem;
+ *
+ * author: Victor Zamanian <victor.zamanian@gmail.com>
+ */
+void transpose(block_t &m)
+{
+  /* Increase horizontal initial index for each row. */
+  int limit = 0;
+  double temp;
+  for (int i = 0; i < 8; i++) {
+    for (int j = limit++; j < 8; j++) {
+      /* Swap m[i][j] and m[j][i]. */
+      temp = m[i][j];
+      m[i][j] = m[j][i];
+      m[j][i] = temp;
+    }
+  }
+}
+
 // Quantifization matrices: (divided by 8)
 // value=0:
 //    x 1 1 1 1 1 1 1
