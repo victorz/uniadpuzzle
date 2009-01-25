@@ -512,8 +512,12 @@ int irle(quant_block_t &bl, signed char *&bitstream)
         } else if (!(*bitstream & 0x80)) {
             *(m++) = (*bitstream & 0x3f) * ((*bitstream & 0x40) ? -1 : 1);
             bitstream++;
-        } else if (*bitstream & 0xe0 == 0x80) {
-            m += *bitstream & 0x1e >> 1;
+        /* If we've bumped into a 0b100zzzzs byte. */
+        } else if ((*bitstream & 0xe0) == 0x80) {
+            /* Skip 0b0000zzzz byte (keep them as zeroes). */
+            m += (*bitstream & 0x1e) >> 1;
+            /* Fetch the next coefficient value and multiply with `s'
+               from 0b100zzzzs. */
             *(m++) = bitstream[1] * (bitstream[0] & 0x1 ? -1 : 1);
             bitstream += 2;
         }
