@@ -432,7 +432,10 @@ void transpose(block_t &m)
 //    8 8 8 8 64 64 64 64
 //    8 8 8 8 64 64 64 64
 
-int quant_values[4][3] = { { 1, 1, 1 }, { 1, 2, 4 }, { 2, 4, 16 }, { 4, 8, 64 } };
+int quant_values[4][3] = { { 1, 1, 1 },
+                           { 1, 2, 4 },
+                           { 2, 4, 16 },
+                           { 4, 8, 64 } };
 
 // Inverse quantization
 void dequant(block_t &m, quant_block_t &qm, int value)
@@ -482,7 +485,7 @@ void izigzag(quant_block_t &in, quant_block_t &out)
         out[0][i] = in[0][zigzag_order[i]];
 }
 
-#define CHECKSKIP while (bitstream[0] == 0xff) bitstream += bitstream[1] + 2;
+#define CHECKSKIP while (((unsigned char) bitstream[0]) == 0xff) bitstream += bitstream[1] + 2;
 
 // Inverse run-length encoding. 
 // TODO: error checking
