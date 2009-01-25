@@ -366,7 +366,6 @@ unsigned char data[] =
         0x00, 0x9e, 0x00, 0x9e, 0x00, 0xac, 0xae, 0xaf, 
     };
 
-
 // "Large enough." Promise you won't tell your lecturers.
 unsigned char pic[320][320];
 
@@ -380,17 +379,17 @@ typedef short quant_block_t[8][8];
  */
 void transpose(block_t &m)
 {
-  /* Increase horizontal initial index for each row. */
-  int limit = 0;
-  double temp;
-  for (int i = 0; i < 8; i++) {
-    for (int j = limit++; j < 8; j++) {
-      /* Swap m[i][j] and m[j][i]. */
-      temp = m[i][j];
-      m[i][j] = m[j][i];
-      m[j][i] = temp;
+    /* Increase horizontal initial index for each row. */
+    int limit = 0;
+    double temp;
+    for (int i = 0; i < 8; i++) {
+        for (int j = limit++; j < 8; j++) {
+          /* Swap m[i][j] and m[j][i]. */
+          temp = m[i][j];
+          m[i][j] = m[j][i];
+          m[j][i] = temp;
+        }
     }
-  }
 }
 
 // Quantifization matrices: (divided by 8)
@@ -491,7 +490,6 @@ void izigzag(quant_block_t &in, quant_block_t &out)
 // TODO: error checking
 int irle(quant_block_t &bl, signed char *&bitstream)
 {
-    printf("Starting inverse run-length encoding...\n");
     /* Value to be returned. */
     int quantval;
     /* Initialize bl with zeros? */
@@ -502,7 +500,7 @@ int irle(quant_block_t &bl, signed char *&bitstream)
     CHECKSKIP;
     /* Assert that we are at the beginning of a block. */
     assert((bitstream[0] & 0xac) == 0xa0);
-    /* Set quantval to be 0, 1 or 3, depending on bitstream[0]. */
+    /* Set quantval to be 0, 1, 2 or 3, depending on bitstream[0]. */
     quantval = bitstream[0] & 0x03;
     /* Combine the next two bytes into a short and store it. */
     *(m++) = (bitstream[1] << 8) | (bitstream[2]);
@@ -511,12 +509,10 @@ int irle(quant_block_t &bl, signed char *&bitstream)
     while (1) {
         /* Skip bytes to be skipped. */
         CHECKSKIP;
-        // printf("*bitstream: %i\n", *bitstream);
         /* If at end of block. */
         if (((unsigned char) *bitstream) == 0xac) {
             /* Go to the next value. */
             bitstream++;
-            printf("Performed inverse run-length encoding.\n\n");
             /* Return the quantization value. */
             return quantval;
         /* If bitstream points to a coefficient value. */
@@ -529,8 +525,6 @@ int irle(quant_block_t &bl, signed char *&bitstream)
             short s = ((*bitstream & 0x40) ? -1 : 1);
 
             *(m++) = xxxxxx * s;
-            printf("Set quant_block_t coefficient value: %i, at %p.\n",
-                   xxxxxx * s, m);
             bitstream++;
         /* If we've bumped into a 0b100zzzzs byte. */
         } else if ((*bitstream & 0xe0) == 0x80) {
@@ -539,24 +533,20 @@ int irle(quant_block_t &bl, signed char *&bitstream)
             /* Fetch the next coefficient value and multiply with `s'
                from 0b100zzzzs. */
             *(m++) = bitstream[1] * (bitstream[0] & 0x1 ? -1 : 1);
-            printf("Kept %i zeroes and set coefficient: %i, at %p.\n",
-                   (*bitstream & 0x1e) >> 1,
-                   bitstream[1] * (bitstream[0] & 0x1 ? -1 : 1),
-                   m);
             /* Move to the next bitstream byte code. */
             bitstream += 2;
         }
     }
 }
 
-main()
+int main(void)
 {
     int row = 0, col = 0;
     unsigned char *bitstream = data;
 
     memset(pic, 0, sizeof(pic));
 
-// TODO: error checking
+    // TODO: error checking
     while (1) {
         /* Skip bytes to be skipped. */
         CHECKSKIP;
@@ -574,7 +564,7 @@ main()
         }
         quant_block_t zqb, qb;
         // Inverse RLE
-        int quantvalue = irle(zqb, (signed char *) bitstream);
+        int quantvalue = irle(zqb, (signed char *&) bitstream);
         // Inverse zig-zag
         izigzag(zqb, qb);
         block_t bl;
