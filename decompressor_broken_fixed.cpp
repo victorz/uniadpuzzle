@@ -503,7 +503,10 @@ int irle(quant_block_t &bl, signed char *&bitstream)
     bitstream += 3;
     while (1) {
         CHECKSKIP;
-        if (*bitstream == 0xac) {
+        // printf("*bitstream: %i\n", *bitstream);
+        /* If at end of block. */
+        if (((unsigned char) *bitstream) == 0xac) {
+            /* Go to the next value. */
             bitstream++;
             return quantval;
         } else if (!(*bitstream & 0x80)) {
