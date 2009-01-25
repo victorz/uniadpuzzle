@@ -491,26 +491,46 @@ void izigzag(quant_block_t &in, quant_block_t &out)
 // TODO: error checking
 int irle(quant_block_t &bl, signed char *&bitstream)
 {
+    printf("Starting inverse run-length encoding...\n");
+    /* Value to be returned. */
     int quantval;
+    /* Initialize bl with zeros? */
     memset(bl, 0, sizeof(bl));
+    /* Set m to point to bl[0] */
     short *m = bl[0];
+    /* Skip bytes to be skipped. */
     CHECKSKIP;
+    /* Assert that we are at the beginning of a block. */
     assert((bitstream[0] & 0xac) == 0xa0);
     /* Set quantval to be 0, 1 or 3, depending on bitstream[0]. */
     quantval = bitstream[0] & 0x03;
     /* Combine the next two bytes into a short and store it. */
     *(m++) = (bitstream[1] << 8) | (bitstream[2]);
+    /* Go to the next value. */
     bitstream += 3;
     while (1) {
+        /* Skip bytes to be skipped. */
         CHECKSKIP;
         // printf("*bitstream: %i\n", *bitstream);
         /* If at end of block. */
         if (((unsigned char) *bitstream) == 0xac) {
             /* Go to the next value. */
             bitstream++;
+            printf("Performed inverse run-length encoding.\n\n");
+            /* Return the quantization value. */
             return quantval;
+        /* If bitstream points to a coefficient value. */
         } else if (!(*bitstream & 0x80)) {
-            *(m++) = (*bitstream & 0x3f) * ((*bitstream & 0x40) ? -1 : 1);
+            /* Fetch the xxxxxx part of the sxxxxxx in the coefficient
+               value. */
+            short xxxxxx = (*bitstream & 0x3f);
+            /* Fetch the s part of the sxxxxxx in the coefficient
+               value. */
+            short s = ((*bitstream & 0x40) ? -1 : 1);
+
+            *(m++) = xxxxxx * s;
+            printf("Set quant_block_t coefficient value: %i, at %p.\n",
+                   xxxxxx * s, m);
             bitstream++;
         /* If we've bumped into a 0b100zzzzs byte. */
         } else if ((*bitstream & 0xe0) == 0x80) {
@@ -519,6 +539,11 @@ int irle(quant_block_t &bl, signed char *&bitstream)
             /* Fetch the next coefficient value and multiply with `s'
                from 0b100zzzzs. */
             *(m++) = bitstream[1] * (bitstream[0] & 0x1 ? -1 : 1);
+            printf("Kept %i zeroes and set coefficient: %i, at %p.\n",
+                   (*bitstream & 0x1e) >> 1,
+                   bitstream[1] * (bitstream[0] & 0x1 ? -1 : 1),
+                   m);
+            /* Move to the next bitstream byte code. */
             bitstream += 2;
         }
     }
@@ -533,6 +558,7 @@ main()
 
 // TODO: error checking
     while (1) {
+        /* Skip bytes to be skipped. */
         CHECKSKIP;
         if (*bitstream = 0xaf)
             break;
@@ -562,11 +588,14 @@ main()
                 unsigned char pixelvalue = (unsigned char) CLAMP(bl[y][x++]);
                 pic[y+col*8][x+row*8] = pixelvalue;
             }
+        }
         col++;
     }
     FILE *f = fopen("image.pgm", "wb");
     fprintf(f, "P5 320 320 255\n");
     fwrite(pic, sizeof(pic), 1, f);
+    printf("Wrote to file.\n");
     fclose(f);
+    printf("Closed file.\n");
     return 0;
 }
