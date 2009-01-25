@@ -449,12 +449,12 @@ void idct(double *x)
 {
     double sum[8];
     for (int k = 0; k < 8; k++) {
-        sum[k] = (1/2) * x[0];
+        sum[k] = (1/2.0) * x[0];
         for (int n = 1; n < 8; n++)
             sum[k] += x[n] * cos(M_PI / 8 * n * (k + 0.5));
     }
     for (int k = 0; k < 8; k++)
-        x[k] = sum[k] * (2/8);
+        x[k] = sum[k] * (2/8.0);
 }
 
 // Inverse 8-by-8 DCT
