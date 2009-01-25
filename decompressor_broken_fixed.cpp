@@ -496,7 +496,9 @@ int irle(quant_block_t &bl, signed char *&bitstream)
     short *m = bl[0];
     CHECKSKIP;
     assert((bitstream[0] & 0xac) == 0xa0);
-    quantval = bitstream[0] && 0x03;
+    /* Set quantval to be 0, 1 or 3, depending on bitstream[0]. */
+    quantval = bitstream[0] & 0x03;
+    /* Combine the next two bytes into a short and store it. */
     *(m++) = (bitstream[1] << 8) | (bitstream[2]);
     bitstream += 3;
     while (1) {
