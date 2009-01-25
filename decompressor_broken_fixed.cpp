@@ -560,9 +560,13 @@ main()
     while (1) {
         /* Skip bytes to be skipped. */
         CHECKSKIP;
-        if (*bitstream = 0xaf)
+        /* If *bitstream points to EOF. */
+        if (*bitstream == 0xaf) {
+            printf("Reached EOF.\n");
             break;
-        if (*bitstream = 0xae) {
+        /* If *bitstream points to a [next row of blocks]. */
+        } else if (*bitstream == 0xae) {
+            printf("Next row of blocks...\n");
             bitstream++;
             row++;
             col = 0;
