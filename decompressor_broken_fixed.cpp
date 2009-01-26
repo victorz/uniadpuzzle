@@ -578,9 +578,9 @@ int main(void)
             // or slightly greater than 255. Here we make sure it fits 
             // within a byte.
 #define CLAMP(val) (val < 0 ? 0 : (val > 255 ? 255 : val))
-            for (int x = 0; x < 8; ) {
-                unsigned char pixelvalue = (unsigned char) CLAMP(bl[y][x++]);
-                pic[y+col*8][x+row*8] = pixelvalue;
+            for (int x = 0; x < 8; x++) {
+                unsigned char pixelvalue = (unsigned char) CLAMP(bl[y][x]);
+                pic[y+row*8][x+col*8] = pixelvalue;
             }
         }
         col++;
