@@ -519,12 +519,9 @@ int irle(quant_block_t &bl, signed char *&bitstream)
         } else if (!(*bitstream & 0x80)) {
             /* Fetch the xxxxxx part of the sxxxxxx in the coefficient
                value. */
-            short xxxxxx = (*bitstream & 0x3f);
-            /* Fetch the s part of the sxxxxxx in the coefficient
+            /* Then fetch the s part of the sxxxxxx in the coefficient
                value. */
-            short s = ((*bitstream & 0x40) ? -1 : 1);
-
-            *(m++) = xxxxxx * s;
+            *(m++) = (*bitstream & 0x3f) * ((*bitstream & 0x40) ? -1 : 1);
             bitstream++;
         /* If we've bumped into a 0b100zzzzs byte. */
         } else if ((*bitstream & 0xe0) == 0x80) {
@@ -577,7 +574,7 @@ int main(void)
             // Round-off errors may turn values in slightly less than 0, 
             // or slightly greater than 255. Here we make sure it fits 
             // within a byte.
-#define CLAMP(val) (val < 0 ? 0 : (val > 255 ? 255 : val))
+#define CLAMP(val) ((val) < 0 ? 0 : ((val) > 255 ? 255 : (val)))
             for (int x = 0; x < 8; x++) {
                 unsigned char pixelvalue = (unsigned char) CLAMP(bl[y][x]);
                 pic[y+row*8][x+col*8] = pixelvalue;
