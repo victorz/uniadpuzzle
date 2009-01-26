@@ -442,6 +442,7 @@ void dequant(block_t &m, quant_block_t &qm, int value)
     for (int y = 0; y < 8; y++)
         for (int x = 0; x < 8; x++)
             m[y][x] = qm[y][x] * quant_values[value][(y>4) + (x>4)] * 8;
+    m[0][0] = 16384;
 }
 
 // Inverse DCT of length 8
