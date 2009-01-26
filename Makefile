@@ -1,4 +1,4 @@
 CFLAGS = -Wall
 
-decompressor_broken_fixed:
+decompressor:
 	g++ $(CFLAGS) $@.cpp -o $@
